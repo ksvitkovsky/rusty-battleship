@@ -1,3 +1,6 @@
+pub mod playmap;
+pub mod point;
+
 use std::{net::TcpListener, thread::spawn};
 
 use tungstenite::{accept, Message};
