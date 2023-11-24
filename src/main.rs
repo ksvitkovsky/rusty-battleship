@@ -1,5 +1,7 @@
+pub mod player;
 pub mod playmap;
 pub mod point;
+pub mod ship;
 
 use std::{net::TcpListener, thread::spawn};
 
