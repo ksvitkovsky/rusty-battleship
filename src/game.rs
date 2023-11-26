@@ -4,7 +4,7 @@ use crate::{game_rules::GameRules, player::Player, playmap::Playmap, point::Poin
 
 type PlayerId = u8;
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 #[repr(u8)]
 pub enum GameStage {
     Waiting = 1,

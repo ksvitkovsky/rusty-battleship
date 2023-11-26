@@ -38,8 +38,8 @@ impl GameRules {
 
     pub fn has_available_ships(&self, player: &Player) -> bool {
         return player.submarines < self.submarine_limit
-            && player.destroyers < self.destroyer_limit
-            && player.cruisers < self.cruiser_limit
-            && player.battleships < self.battleship_limit;
+            || player.destroyers < self.destroyer_limit
+            || player.cruisers < self.cruiser_limit
+            || player.battleships < self.battleship_limit;
     }
 }

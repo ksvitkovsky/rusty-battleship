@@ -13,15 +13,19 @@ pub struct Point {
 }
 
 impl Point {
-    pub fn from_u8(number: u8) -> Result<Self> {
-        let x = number >> 4;
-        let y = number & 0b0000_1111;
-
+    pub fn new(x: u8, y: u8) -> Result<Self> {
         if x > 9 || y > 9 {
             return Err(anyhow!("coordinate is bound to 0..9 range"));
         }
 
         return Ok(Point { x, y });
+    }
+
+    pub fn from_u8(number: u8) -> Result<Self> {
+        let x = number >> 4;
+        let y = number & 0b0000_1111;
+
+        return Point::new(x, y);
     }
 
     pub fn get_next(&self, orientation: &Orientation) -> Result<Self> {
