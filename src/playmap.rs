@@ -1,6 +1,6 @@
 use crate::point::Point;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Playmap {
     pub value: u128,
 }

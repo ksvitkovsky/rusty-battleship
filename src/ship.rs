@@ -10,7 +10,21 @@ pub enum Ship {
     Battleship(Orientation) = 4,
 }
 
+pub const SUBMARINE_SIZE: u8 = 1;
+pub const DESTROYER_SIZE: u8 = 2;
+pub const CRUISER_SIZE: u8 = 3;
+pub const BATTLESHIP_SIZE: u8 = 4;
+
 impl Ship {
+    pub fn limit(&self) -> u8 {
+        return match self {
+            Self::Submarine => 4,
+            Self::Destroyer(_) => 3,
+            Self::Cruiser(_) => 2,
+            Self::Battleship(_) => 1,
+        };
+    }
+
     pub fn get_points(&self, point: Point) -> Result<Vec<Point>> {
         let mut points = Vec::new();
 

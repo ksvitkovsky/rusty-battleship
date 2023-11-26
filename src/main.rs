@@ -1,3 +1,4 @@
+pub mod game;
 pub mod player;
 pub mod playmap;
 pub mod point;
@@ -21,6 +22,7 @@ fn main() {
 
                         websocket.send(Message::Binary(bin)).unwrap()
                     }
+                    Message::Close(_) => {}
                     _ => {}
                 }
             }
