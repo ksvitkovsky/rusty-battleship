@@ -20,9 +20,9 @@ pub struct Game {
     pub player_a: Player,
     pub player_b: Player,
 
-    connection_count: u8,
-    connection_a: Option<u8>,
-    connection_b: Option<u8>,
+    connection_count: PlayerId,
+    connection_a: Option<PlayerId>,
+    connection_b: Option<PlayerId>,
 }
 
 pub struct StateSnapshot {
@@ -33,9 +33,9 @@ pub struct StateSnapshot {
 }
 
 struct Players<'a> {
-    my_id: u8,
+    my_id: PlayerId,
     me: &'a mut Player,
-    enemy_id: u8,
+    enemy_id: PlayerId,
     enemy: &'a mut Player,
 }
 
@@ -54,7 +54,7 @@ impl Game {
         };
     }
 
-    pub fn connect(&mut self) -> Result<u8> {
+    pub fn connect(&mut self) -> Result<PlayerId> {
         if self.connection_a.is_some() && self.connection_b.is_some() {
             return Err(anyhow!("both seats taken"));
         }
@@ -74,11 +74,11 @@ impl Game {
         return Ok(self.connection_count);
     }
 
-    pub fn disconnect(&mut self, my_connection_id: u8) -> Result<()> {
-        if self.connection_a == Some(my_connection_id) {
+    pub fn disconnect(&mut self, my_id: PlayerId) -> Result<()> {
+        if self.connection_a == Some(my_id) {
             self.connection_a = self.connection_b;
             self.connection_b = None;
-        } else if self.connection_b == Some(my_connection_id) {
+        } else if self.connection_b == Some(my_id) {
             self.connection_b = None;
         } else {
             return Err(anyhow!("player not found"));
@@ -92,17 +92,15 @@ impl Game {
         return Ok(());
     }
 
-    pub fn place_figure(&mut self, my_connection_id: u8, ship: Ship, point: Point) -> Result<()> {
+    pub fn place_figure(&mut self, my_id: PlayerId, ship: Ship, point: Point) -> Result<()> {
         let stage = self.stage.clone();
         let rules = self.rules.clone();
 
-        if stage != GameStage::PlayerShips(None)
-            && stage != GameStage::PlayerShips(Some(my_connection_id))
-        {
+        if stage != GameStage::PlayerShips(None) && stage != GameStage::PlayerShips(Some(my_id)) {
             return Err(anyhow!("cant place ships, wrong stage"));
         }
 
-        let players = self.get_players(my_connection_id)?;
+        let players = self.get_players(my_id)?;
         if rules.can_place_ship(players.me, ship) {
             players.me.place_figure(ship, point)?;
         } else {
@@ -120,25 +118,25 @@ impl Game {
         return Ok(());
     }
 
-    pub fn remove_figure(&mut self, my_connection_id: u8, point: Point) -> Result<()> {
+    pub fn remove_figure(&mut self, my_id: PlayerId, point: Point) -> Result<()> {
         if self.stage != GameStage::PlayerShips(None)
-            && self.stage != GameStage::PlayerShips(Some(my_connection_id))
+            && self.stage != GameStage::PlayerShips(Some(my_id))
         {
             return Err(anyhow!("cant remove ships, wrong stage"));
         }
 
-        let players = self.get_players(my_connection_id)?;
+        let players = self.get_players(my_id)?;
         players.me.remove_figure(point)?;
 
         return Ok(());
     }
 
-    pub fn shoot(&mut self, my_connection_id: u8, point: Point) -> Result<()> {
-        if self.stage != GameStage::PlayerShoots(my_connection_id) {
+    pub fn shoot(&mut self, my_id: PlayerId, point: Point) -> Result<()> {
+        if self.stage != GameStage::PlayerShoots(my_id) {
             return Err(anyhow!("cant shoot, wrong turn or stage"));
         }
 
-        let players = self.get_players(my_connection_id)?;
+        let players = self.get_players(my_id)?;
         players.enemy.register_shot(point);
 
         if players.enemy.has_ship_at(point) {
@@ -154,8 +152,8 @@ impl Game {
         return Ok(());
     }
 
-    pub fn get_state(&mut self, my_connection_id: u8) -> Result<StateSnapshot> {
-        let players = self.get_players(my_connection_id)?;
+    pub fn get_state(&mut self, my_id: PlayerId) -> Result<StateSnapshot> {
+        let players = self.get_players(my_id)?;
 
         return Ok(StateSnapshot {
             my_ships: players.me.ships,
@@ -165,15 +163,15 @@ impl Game {
         });
     }
 
-    fn get_players(&mut self, my_connection_id: u8) -> Result<Players> {
-        if self.connection_a == Some(my_connection_id) && self.connection_b.is_some() {
+    fn get_players(&mut self, my_id: PlayerId) -> Result<Players> {
+        if self.connection_a == Some(my_id) && self.connection_b.is_some() {
             return Ok(Players {
                 my_id: self.connection_a.unwrap(),
                 me: &mut self.player_a,
                 enemy_id: self.connection_b.unwrap(),
                 enemy: &mut self.player_b,
             });
-        } else if self.connection_b == Some(my_connection_id) && self.connection_a.is_some() {
+        } else if self.connection_b == Some(my_id) && self.connection_a.is_some() {
             return Ok(Players {
                 my_id: self.connection_b.unwrap(),
                 me: &mut self.player_b,
