@@ -3,20 +3,17 @@ use anyhow::{anyhow, Result};
 use crate::{
     playmap::Playmap,
     point::{Orientation, Point},
-    ship::{
-        Ship, BATTLESHIP_LIMIT, BATTLESHIP_SIZE, CRUISER_LIMIT, CRUISER_SIZE, DESTROYER_LIMIT,
-        DESTROYER_SIZE, SUBMARINE_LIMIT, SUBMARINE_SIZE,
-    },
+    ship::{Ship, BATTLESHIP_SIZE, CRUISER_SIZE, DESTROYER_SIZE, SUBMARINE_SIZE},
 };
 
 pub struct Player {
     pub ships: Playmap,
     pub shots: Playmap,
 
-    submarines: u8,
-    destroyers: u8,
-    cruisers: u8,
-    battleships: u8,
+    pub submarines: u8,
+    pub destroyers: u8,
+    pub cruisers: u8,
+    pub battleships: u8,
 }
 
 impl Player {
@@ -41,34 +38,21 @@ impl Player {
         return Playmap { value };
     }
 
-    pub fn has_available_ships(&self) -> bool {
-        return self.submarines < SUBMARINE_LIMIT
-            || self.destroyers < DESTROYER_LIMIT
-            || self.cruisers < CRUISER_LIMIT
-            || self.battleships < BATTLESHIP_LIMIT;
-    }
-
     pub fn has_intact_ships(&self) -> bool {
         return self.get_hits().value.count_ones() < self.ships.value.count_ones();
     }
 
     pub fn place_figure(&mut self, ship: Ship, point: Point) -> Result<()> {
-        let count = match ship {
-            Ship::Submarine => &mut self.submarines,
-            Ship::Destroyer(_) => &mut self.destroyers,
-            Ship::Cruiser(_) => &mut self.cruisers,
-            Ship::Battleship(_) => &mut self.battleships,
-        };
-
-        if *count == ship.limit() {
-            return Err(anyhow!("cant place ship above limit"));
-        }
-
         for point in ship.get_points(point)? {
             self.ships.mark_field(point);
         }
 
-        *count += 1;
+        match ship {
+            Ship::Submarine => self.submarines += 1,
+            Ship::Destroyer(_) => self.destroyers += 1,
+            Ship::Cruiser(_) => self.cruisers += 1,
+            Ship::Battleship(_) => self.battleships += 1,
+        };
 
         return Ok(());
     }

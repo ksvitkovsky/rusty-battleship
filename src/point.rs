@@ -1,5 +1,6 @@
 use anyhow::{anyhow, Result};
 
+#[derive(Clone, Copy)]
 pub enum Orientation {
     Horizontal = 1,
     Vertical = 2,

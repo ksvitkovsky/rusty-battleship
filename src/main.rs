@@ -1,4 +1,5 @@
 pub mod game;
+pub mod game_rules;
 pub mod player;
 pub mod playmap;
 pub mod point;

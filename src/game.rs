@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
 
-use crate::{player::Player, playmap::Playmap, point::Point, ship::Ship};
+use crate::{game_rules::GameRules, player::Player, playmap::Playmap, point::Point, ship::Ship};
 
 type PlayerId = u8;
 
@@ -14,6 +14,7 @@ pub enum GameStage {
 }
 
 pub struct Game {
+    pub rules: GameRules,
     pub stage: GameStage,
 
     pub player_a: Player,
@@ -39,8 +40,9 @@ struct Players<'a> {
 }
 
 impl Game {
-    pub fn new() -> Self {
+    pub fn new(rules: GameRules) -> Self {
         return Game {
+            rules: rules,
             stage: GameStage::Waiting,
 
             player_a: Player::new(),
@@ -92,6 +94,7 @@ impl Game {
 
     pub fn place_figure(&mut self, my_connection_id: u8, ship: Ship, point: Point) -> Result<()> {
         let stage = self.stage.clone();
+        let rules = self.rules.clone();
 
         if stage != GameStage::PlayerShips(None)
             && stage != GameStage::PlayerShips(Some(my_connection_id))
@@ -100,9 +103,13 @@ impl Game {
         }
 
         let players = self.get_players(my_connection_id)?;
-        players.me.place_figure(ship, point)?;
+        if rules.can_place_ship(players.me, ship) {
+            players.me.place_figure(ship, point)?;
+        } else {
+            return Err(anyhow!("cant place ships above limit"));
+        }
 
-        if !players.me.has_intact_ships() {
+        if !rules.has_available_ships(players.me) {
             if stage == GameStage::PlayerShips(None) {
                 self.stage = GameStage::PlayerShips(Some(players.enemy_id));
             } else {
@@ -183,11 +190,14 @@ impl Game {
 mod test_game {
     use anyhow::Result;
 
+    use crate::game_rules::GameRules;
+
     use super::Game;
 
     #[test]
     pub fn test_connect() -> Result<()> {
-        let mut game = Game::new();
+        let rules = GameRules::new();
+        let mut game = Game::new(rules);
 
         assert_eq!(game.connect()?, 1);
         assert_eq!(game.connect()?, 2);
