@@ -17,7 +17,7 @@ impl Playmap {
     // TODO
     // come up with better interface for mark/demark
 
-    pub fn is_marked_field(&mut self, point: Point) -> bool {
+    pub fn is_marked_field(&self, point: Point) -> bool {
         let point_index = point.y * 10 + point.x + 1;
         let bit_index = 128 - point_index;
 

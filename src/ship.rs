@@ -15,6 +15,11 @@ pub const DESTROYER_SIZE: u8 = 2;
 pub const CRUISER_SIZE: u8 = 3;
 pub const BATTLESHIP_SIZE: u8 = 4;
 
+pub const SUBMARINE_LIMIT: u8 = 4;
+pub const DESTROYER_LIMIT: u8 = 3;
+pub const CRUISER_LIMIT: u8 = 2;
+pub const BATTLESHIP_LIMIT: u8 = 1;
+
 impl Ship {
     pub fn limit(&self) -> u8 {
         return match self {

@@ -3,7 +3,10 @@ use anyhow::{anyhow, Result};
 use crate::{
     playmap::Playmap,
     point::{Orientation, Point},
-    ship::{Ship, BATTLESHIP_SIZE, CRUISER_SIZE, DESTROYER_SIZE, SUBMARINE_SIZE},
+    ship::{
+        Ship, BATTLESHIP_LIMIT, BATTLESHIP_SIZE, CRUISER_LIMIT, CRUISER_SIZE, DESTROYER_LIMIT,
+        DESTROYER_SIZE, SUBMARINE_LIMIT, SUBMARINE_SIZE,
+    },
 };
 
 pub struct Player {
@@ -29,9 +32,24 @@ impl Player {
         };
     }
 
+    pub fn has_ship_at(&self, point: Point) -> bool {
+        return self.ships.is_marked_field(point);
+    }
+
     pub fn get_hits(&self) -> Playmap {
         let value = self.ships.value & self.shots.value;
         return Playmap { value };
+    }
+
+    pub fn has_available_ships(&self) -> bool {
+        return self.submarines < SUBMARINE_LIMIT
+            || self.destroyers < DESTROYER_LIMIT
+            || self.cruisers < CRUISER_LIMIT
+            || self.battleships < BATTLESHIP_LIMIT;
+    }
+
+    pub fn has_intact_ships(&self) -> bool {
+        return self.get_hits().value.count_ones() < self.ships.value.count_ones();
     }
 
     pub fn place_figure(&mut self, ship: Ship, point: Point) -> Result<()> {
@@ -165,6 +183,9 @@ mod test_player {
 
     #[test]
     pub fn test_register_shot() {
-        todo!()
+        let mut player = Player::new();
+
+        player.register_shot(Point { x: 1, y: 0 });
+        assert_eq!(player.shots.value, 0b0100 << 124);
     }
 }
