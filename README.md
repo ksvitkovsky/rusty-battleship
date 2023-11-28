@@ -1,5 +1,7 @@
 # rusty-battleship
 
+> 📝 **Disclaimer** I may be adding some stuff here, but for the most part I consider this exercise done - the game flow is covered by a test. What's left out is the client to render the play-fields and relay commands to the server, and (ironically) the WebSocket communication part.
+
 Implement a multiplayer version of the *Battleship* game ([wiki](https://en.wikipedia.org/wiki/Battleship_(game))) with Rust and Svelte (?) and communication over WebSockets.
 
 ### Constraints
