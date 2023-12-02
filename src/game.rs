@@ -1,3 +1,5 @@
+use std::sync::mpsc::{channel, Receiver, Sender};
+
 use anyhow::{anyhow, Result};
 
 use crate::{
@@ -17,6 +19,9 @@ pub struct Game {
     connection_count: PlayerId,
     connection_a: Option<PlayerId>,
     connection_b: Option<PlayerId>,
+
+    sender_a: Option<Sender<()>>,
+    sender_b: Option<Sender<()>>,
 }
 
 pub struct StateSnapshot {
@@ -45,35 +50,43 @@ impl Game {
             connection_count: 0,
             connection_a: None,
             connection_b: None,
+
+            sender_a: None,
+            sender_b: None,
         };
     }
 
-    pub fn connect(&mut self) -> Result<PlayerId> {
+    pub fn connect(&mut self) -> Result<(PlayerId, Receiver<()>)> {
         if self.connection_a.is_some() && self.connection_b.is_some() {
             return Err(anyhow!("both seats taken"));
         }
 
         self.connection_count += 1;
 
+        let (sender, receiver) = channel();
+
         if self.connection_a.is_none() {
             self.connection_a = Some(self.connection_count);
+            self.sender_a = Some(sender);
         } else {
             self.connection_b = Some(self.connection_count);
+            self.sender_b = Some(sender);
         }
 
         if self.connection_a.is_some() && self.connection_b.is_some() {
             self.stage = GameStage::PlayerShips(None);
         }
 
-        return Ok(self.connection_count);
+        return Ok((self.connection_count, receiver));
     }
 
     pub fn disconnect(&mut self, my_id: PlayerId) -> Result<()> {
         if self.connection_a == Some(my_id) {
-            self.connection_a = self.connection_b;
-            self.connection_b = None;
+            self.connection_a = self.connection_b.take();
+            self.sender_a = self.sender_b.take();
         } else if self.connection_b == Some(my_id) {
             self.connection_b = None;
+            self.sender_b = None;
         } else {
             return Err(anyhow!("player not found"));
         }
@@ -157,6 +170,17 @@ impl Game {
         });
     }
 
+    pub fn trigger_sync(&self) -> Result<()> {
+        if let Some(sender_a) = &self.sender_a {
+            sender_a.send(())?;
+        }
+        if let Some(sender_b) = &self.sender_b {
+            sender_b.send(())?;
+        }
+
+        return Ok(());
+    }
+
     fn get_players(&mut self, my_id: PlayerId) -> Result<Players> {
         if self.connection_a == Some(my_id) && self.connection_b.is_some() {
             return Ok(Players {
@@ -191,8 +215,12 @@ mod test_game {
         let rules = GameRules::new();
         let mut game = Game::new(rules);
 
-        assert_eq!(game.connect()?, 1);
-        assert_eq!(game.connect()?, 2);
+        let (connection_id, _) = game.connect()?;
+        assert_eq!(connection_id, 1);
+
+        let (connection_id, _) = game.connect()?;
+        assert_eq!(connection_id, 2);
+
         assert!(game.connect().is_err());
 
         return Ok(());

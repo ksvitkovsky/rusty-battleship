@@ -18,8 +18,8 @@ fn it_plays_start_to_finish() -> Result<()> {
 
     assert_eq!(game.stage, GameStage::Waiting);
 
-    let player_a = game.connect()?;
-    let player_b = game.connect()?;
+    let (player_a, _) = game.connect()?;
+    let (player_b, _) = game.connect()?;
 
     assert_eq!(game.stage, GameStage::PlayerShips(None));
 
