@@ -1,4 +1,4 @@
-use anyhow::{Ok, Result};
+use anyhow::{anyhow, Error, Ok, Result};
 
 use crate::point::{Orientation, Point};
 
@@ -15,6 +15,23 @@ pub const SUBMARINE_SIZE: u8 = 1;
 pub const DESTROYER_SIZE: u8 = 2;
 pub const CRUISER_SIZE: u8 = 3;
 pub const BATTLESHIP_SIZE: u8 = 4;
+
+impl TryFrom<u8> for Ship {
+    type Error = Error;
+
+    fn try_from(value: u8) -> Result<Ship> {
+        return match value {
+            1 => Ok(Ship::Submarine),
+            2 => Ok(Ship::Destroyer(Orientation::Horizontal)),
+            3 => Ok(Ship::Destroyer(Orientation::Vertical)),
+            4 => Ok(Ship::Cruiser(Orientation::Horizontal)),
+            5 => Ok(Ship::Cruiser(Orientation::Vertical)),
+            6 => Ok(Ship::Battleship(Orientation::Horizontal)),
+            7 => Ok(Ship::Battleship(Orientation::Vertical)),
+            _ => Err(anyhow!("unknown ship type")),
+        };
+    }
+}
 
 impl Ship {
     pub fn get_points(&self, point: Point) -> Result<Vec<Point>> {

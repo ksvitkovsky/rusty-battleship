@@ -1,17 +1,11 @@
 use anyhow::{anyhow, Result};
 
-use crate::{game_rules::GameRules, player::Player, playmap::Playmap, point::Point, ship::Ship};
+use crate::{
+    game_rules::GameRules, game_stage::GameStage, player::Player, playmap::Playmap, point::Point,
+    ship::Ship,
+};
 
 type PlayerId = u8;
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-#[repr(u8)]
-pub enum GameStage {
-    Waiting = 1,
-    PlayerShips(Option<PlayerId>) = 2,
-    PlayerShoots(PlayerId) = 3,
-    PlayerWins(PlayerId) = 4,
-}
 
 pub struct Game {
     pub rules: GameRules,
