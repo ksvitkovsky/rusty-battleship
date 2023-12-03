@@ -137,8 +137,8 @@ mod test_player {
     #[test]
     pub fn test_get_hits() {
         let mut player = Player::new();
-        player.ships = Playmap::from_u128(0b1001 << 124);
-        player.shots = Playmap::from_u128(0b0101 << 124);
+        player.ships = Playmap::from(0b1001 << 124);
+        player.shots = Playmap::from(0b0101 << 124);
 
         assert_eq!(player.get_hits().value, 0b0001 << 124);
     }
@@ -157,7 +157,7 @@ mod test_player {
     #[test]
     pub fn test_remove_figure() -> Result<()> {
         let mut player = Player::new();
-        player.ships = Playmap::from_u128(0b0110 << 124);
+        player.ships = Playmap::from(0b0110 << 124);
 
         player.remove_figure(Point { x: 1, y: 0 })?;
         assert_eq!(player.ships.value, 0b0000 << 124);

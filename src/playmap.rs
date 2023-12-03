@@ -10,10 +10,6 @@ impl Playmap {
         return Playmap { value: 0 };
     }
 
-    pub fn from_u128(value: u128) -> Self {
-        return Playmap { value };
-    }
-
     // TODO
     // come up with better interface for mark/demark
 
@@ -39,13 +35,19 @@ impl Playmap {
     }
 }
 
+impl From<u128> for Playmap {
+    fn from(value: u128) -> Self {
+        return Playmap { value };
+    }
+}
+
 #[cfg(test)]
 mod playmap_test {
     use crate::{playmap::Playmap, point::Point};
 
     #[test]
     pub fn test_is_marked_field() {
-        let mut map = Playmap::from_u128(0b0010 << 124);
+        let map = Playmap::from(0b0010 << 124);
 
         assert_eq!(map.is_marked_field(Point { x: 2, y: 0 }), true);
         assert_eq!(map.is_marked_field(Point { x: 1, y: 0 }), false);
@@ -56,20 +58,20 @@ mod playmap_test {
         let mut map = Playmap::new();
 
         map.mark_field(Point { x: 0, y: 0 });
-        assert_eq!(map, Playmap::from_u128(0b1000 << 124));
+        assert_eq!(map, Playmap::from(0b1000 << 124));
 
         map.mark_field(Point { x: 2, y: 0 });
-        assert_eq!(map, Playmap::from_u128(0b1010 << 124));
+        assert_eq!(map, Playmap::from(0b1010 << 124));
     }
 
     #[test]
     pub fn test_demark_field() {
-        let mut map = Playmap::from_u128(0b1010 << 124);
+        let mut map = Playmap::from(0b1010 << 124);
 
         map.demark_field(Point { x: 0, y: 0 });
-        assert_eq!(map, Playmap::from_u128(0b0010 << 124));
+        assert_eq!(map, Playmap::from(0b0010 << 124));
 
         map.demark_field(Point { x: 2, y: 0 });
-        assert_eq!(map, Playmap::from_u128(0b0000 << 124));
+        assert_eq!(map, Playmap::from(0b0000 << 124));
     }
 }

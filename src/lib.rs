@@ -42,7 +42,7 @@ pub fn main() {
                     let state = game_lock.get_state(my_id)?;
 
                     let mut payload: Vec<u8> = Vec::new();
-                    payload.push(stage.into_u8(my_id)?);
+                    payload.push(stage.try_into_u8(my_id)?);
                     payload.extend(state.my_ships.value.to_be_bytes());
                     payload.extend(state.my_marks.value.to_be_bytes());
                     payload.extend(state.enemy_marks.value.to_be_bytes());
@@ -65,7 +65,7 @@ pub fn main() {
                                 game_lock.place_figure(
                                     my_id,
                                     Ship::try_from(ship_u8)?,
-                                    Point::from_u8(point_u8)?,
+                                    Point::try_from(point_u8)?,
                                 )?;
 
                                 game_lock.trigger_sync()?;
@@ -75,7 +75,7 @@ pub fn main() {
                             [2, point_u8] => {
                                 let mut game_lock = player_game.lock().unwrap();
 
-                                game_lock.remove_figure(my_id, Point::from_u8(point_u8)?)?;
+                                game_lock.remove_figure(my_id, Point::try_from(point_u8)?)?;
 
                                 game_lock.trigger_sync()?;
                                 drop(game_lock);
@@ -84,7 +84,7 @@ pub fn main() {
                             [3, point_u8] => {
                                 let mut game_lock = player_game.lock().unwrap();
 
-                                game_lock.shoot(my_id, Point::from_u8(point_u8)?)?;
+                                game_lock.shoot(my_id, Point::try_from(point_u8)?)?;
 
                                 game_lock.trigger_sync()?;
                                 drop(game_lock);

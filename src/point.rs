@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Error, Result};
 
 #[derive(Clone, Copy)]
 pub enum Orientation {
@@ -19,13 +19,6 @@ impl Point {
         }
 
         return Ok(Point { x, y });
-    }
-
-    pub fn from_u8(number: u8) -> Result<Self> {
-        let x = number >> 4;
-        let y = number & 0b0000_1111;
-
-        return Point::new(x, y);
     }
 
     pub fn get_next(&self, orientation: &Orientation) -> Result<Self> {
@@ -79,6 +72,17 @@ impl Point {
     }
 }
 
+impl TryFrom<u8> for Point {
+    type Error = Error;
+
+    fn try_from(value: u8) -> Result<Self> {
+        let x = value >> 4;
+        let y = value & 0b0000_1111;
+
+        return Point::new(x, y);
+    }
+}
+
 #[cfg(test)]
 mod point_test {
     use anyhow::Result;
@@ -87,8 +91,8 @@ mod point_test {
 
     #[test]
     pub fn test_from_u8() -> Result<()> {
-        assert_eq!(Point::from_u8(0b0000_0000)?, Point { x: 0, y: 0 });
-        assert_eq!(Point::from_u8(0b1001_1000)?, Point { x: 9, y: 8 });
+        assert_eq!(Point::try_from(0b0000_0000)?, Point { x: 0, y: 0 });
+        assert_eq!(Point::try_from(0b1001_1000)?, Point { x: 9, y: 8 });
 
         return Ok(());
     }

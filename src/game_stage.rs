@@ -12,7 +12,7 @@ pub enum GameStage {
 }
 
 impl GameStage {
-    pub fn into_u8(&self, my_id: u8) -> Result<u8> {
+    pub fn try_into_u8(&self, my_id: u8) -> Result<u8> {
         return match self {
             GameStage::Waiting => Ok(1),
             GameStage::PlayerShips(player) => {
