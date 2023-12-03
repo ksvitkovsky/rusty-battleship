@@ -110,4 +110,18 @@ mod point_test {
 
         return Ok(());
     }
+
+    #[test]
+    pub fn test_get_prev() -> Result<()> {
+        let prev = Point { x: 1, y: 1 }.get_prev(&Orientation::Horizontal)?;
+        assert_eq!(prev, Point { x: 0, y: 1 });
+
+        let prev = prev.get_prev(&Orientation::Vertical)?;
+        assert_eq!(prev, Point { x: 0, y: 0 });
+
+        let prev = Point { x: 0, y: 0 }.get_prev(&Orientation::Horizontal);
+        assert!(prev.is_err());
+
+        return Ok(());
+    }
 }

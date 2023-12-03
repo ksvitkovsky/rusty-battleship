@@ -27,19 +27,50 @@ impl GameRules {
         };
     }
 
-    pub fn get_limit(&self, ship: Ship) -> u8 {
-        return match ship {
-            Ship::Submarine => self.submarine_limit,
-            Ship::Destroyer(_) => self.destroyer_limit,
-            Ship::Cruiser(_) => self.cruiser_limit,
-            Ship::Battleship(_) => self.destroyer_limit,
-        };
-    }
-
     pub fn has_available_ships(&self, player: &Player) -> bool {
         return player.submarines < self.submarine_limit
             || player.destroyers < self.destroyer_limit
             || player.cruisers < self.cruiser_limit
             || player.battleships < self.battleship_limit;
+    }
+}
+
+#[cfg(test)]
+mod test_game_rules {
+    use crate::game_rules::GameRules;
+    use crate::player::Player;
+    use crate::point::Orientation;
+    use crate::ship::Ship;
+
+    #[test]
+    pub fn test_can_place_ship() {
+        let rules = GameRules::new();
+
+        let mut player = Player::new();
+        player.submarines = 3;
+        player.destroyers = 3;
+        player.cruisers = 2;
+        player.battleships = 1;
+
+        assert_eq!(rules.can_place_ship(&player, Ship::Submarine), true);
+
+        let cruiser = Ship::Cruiser(Orientation::Horizontal);
+        assert_eq!(rules.can_place_ship(&player, cruiser), false);
+    }
+
+    #[test]
+    pub fn test_has_available_ships(){
+        let rules = GameRules::new();
+
+        let mut player = Player::new();
+        player.submarines = 3;
+        player.destroyers = 3;
+        player.cruisers = 2;
+        player.battleships = 1;
+
+        assert_eq!(rules.has_available_ships(&player), true);
+
+        player.submarines = 4;
+        assert_eq!(rules.has_available_ships(&player), false);
     }
 }

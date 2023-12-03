@@ -225,4 +225,35 @@ mod test_game {
 
         return Ok(());
     }
+
+    #[test]
+    pub fn test_disconnect() -> Result<()> {
+        let rules = GameRules::new();
+        let mut game = Game::new(rules);
+
+        let (connection_a, _) = game.connect()?;
+        let (connection_b, _) = game.connect()?;
+
+        game.disconnect(connection_a)?;
+
+        assert_eq!(game.connection_a, Some(connection_b));
+        assert_eq!(game.connection_b, None);
+
+        return Ok(());
+    }
+
+    #[test]
+    pub fn test_trigger_sync() -> Result<()> {
+        let mut game = Game::new(GameRules::new());
+
+        let (_, receiver_a) = game.connect()?;
+        let (_, receiver_b) = game.connect()?;
+
+        game.trigger_sync()?;
+
+        assert_eq!(receiver_a.try_iter().count(), 1);
+        assert_eq!(receiver_b.try_iter().count(), 1);
+
+        return Ok(());
+    }
 }

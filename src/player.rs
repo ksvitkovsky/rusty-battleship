@@ -135,12 +135,30 @@ mod test_player {
     use super::Player;
 
     #[test]
+    pub fn has_ship_at() {
+        let mut player = Player::new();
+        player.ships = Playmap::from(0b0100 << 124);
+
+        assert_eq!(player.has_ship_at(Point::new(0, 0).unwrap()), false);
+        assert_eq!(player.has_ship_at(Point::new(1, 0).unwrap()), true);
+    }
+
+    #[test]
     pub fn test_get_hits() {
         let mut player = Player::new();
         player.ships = Playmap::from(0b1001 << 124);
         player.shots = Playmap::from(0b0101 << 124);
 
         assert_eq!(player.get_hits().value, 0b0001 << 124);
+    }
+
+    #[test]
+    pub fn has_intact_ships() {
+        let mut player = Player::new();
+        player.ships = Playmap::from(0b1100 << 124);
+        player.shots = Playmap::from(0b1010 << 124);
+
+        assert_eq!(player.has_intact_ships(), true);
     }
 
     #[test]
@@ -158,6 +176,7 @@ mod test_player {
     pub fn test_remove_figure() -> Result<()> {
         let mut player = Player::new();
         player.ships = Playmap::from(0b0110 << 124);
+        player.destroyers = 1;
 
         player.remove_figure(Point { x: 1, y: 0 })?;
         assert_eq!(player.ships.value, 0b0000 << 124);
