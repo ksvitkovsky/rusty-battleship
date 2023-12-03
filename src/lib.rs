@@ -36,8 +36,19 @@ pub fn main() {
 
             loop {
                 if let Ok(_) = receiver.try_recv() {
-                    let game_lock = player_game.lock().unwrap();
-                    game_lock.trigger_sync()?;
+                    let mut game_lock = player_game.lock().unwrap();
+
+                    let stage = game_lock.stage.clone();
+                    let state = game_lock.get_state(my_id)?;
+
+                    let mut payload: Vec<u8> = Vec::new();
+                    payload.push(stage.into_u8(my_id)?);
+                    payload.extend(state.my_ships.value.to_be_bytes());
+                    payload.extend(state.my_marks.value.to_be_bytes());
+                    payload.extend(state.enemy_marks.value.to_be_bytes());
+                    payload.extend(state.enemy_losses.value.to_be_bytes());
+
+                    websocket.send(Message::Binary(payload))?;
 
                     drop(game_lock);
                 }
